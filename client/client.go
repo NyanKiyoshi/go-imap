@@ -28,6 +28,10 @@ var errClosed = fmt.Errorf("imap: connection closed")
 // errUnregisterHandler is returned by a response handler to unregister itself.
 var errUnregisterHandler = fmt.Errorf("imap: unregister handler")
 
+// CapabilityMap defines a map of server compabilities.
+// Refer to Client.Support.
+type CapabilityMap = map[string]bool
+
 // Update is an unilateral server update.
 type Update interface {
 	update()
@@ -79,7 +83,7 @@ type Client struct {
 	// The selected mailbox, if there is one.
 	mailbox *imap.MailboxStatus
 	// The cached server capabilities.
-	caps map[string]bool
+	caps CapabilityMap
 	// state, mailbox and caps may be accessed in different goroutines. Protect
 	// access.
 	locker sync.Mutex
@@ -355,7 +359,7 @@ func (c *Client) handleContinuationReqs() {
 func (c *Client) gotStatusCaps(args []interface{}) {
 	c.locker.Lock()
 
-	c.caps = make(map[string]bool)
+	c.caps = make(CapabilityMap)
 	for _, cap := range args {
 		if cap, ok := cap.(string); ok {
 			c.caps[cap] = true

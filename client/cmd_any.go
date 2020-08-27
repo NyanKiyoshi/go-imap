@@ -17,7 +17,7 @@ var ErrAlreadyLoggedOut = errors.New("Already logged out")
 // isn't needed.
 //
 // Most of the time, Support should be used instead.
-func (c *Client) Capability() (map[string]bool, error) {
+func (c *Client) Capability() (CapabilityMap, error) {
 	cmd := &commands.Capability{}
 
 	if status, err := c.execute(cmd, nil); err != nil {
@@ -30,6 +30,12 @@ func (c *Client) Capability() (map[string]bool, error) {
 	caps := c.caps
 	c.locker.Unlock()
 	return caps, nil
+}
+
+// Capabilities returns the list of capabilities supported by the server.
+// They are populated during the greeting or Support.
+func (c *Client) Capabilities() CapabilityMap {
+	return c.caps
 }
 
 // Support checks if cap is a capability supported by the server. If the server
